@@ -28,6 +28,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getFlagThumb } from "@/lib/flags";
 import { COUNTRIES } from "@/lib/countries";
 import { CountryCombobox } from "@/components/CountryCombobox";
+import { RegionalContextsGenerator } from "@/components/admin/RegionalContextsGenerator";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — PGC 2026" }] }),
@@ -643,7 +644,9 @@ function RegionalContextsPanel({ onCountChange }: { onCountChange: (c: { rows: n
   const uniqueCountries = Array.from(new Set(rows.map(r => r.country))).sort();
 
   return (
-    <div className="glass-card p-5">
+    <>
+      <RegionalContextsGenerator onAfterRun={reload} />
+      <div className="glass-card p-5">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-3">
         <div>
           <p className="eyebrow">// Regional Contexts</p>
@@ -757,6 +760,7 @@ function RegionalContextsPanel({ onCountChange }: { onCountChange: (c: { rows: n
         </table>
       </div>
     </div>
+    </>
   );
 }
 
