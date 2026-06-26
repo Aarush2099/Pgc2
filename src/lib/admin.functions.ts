@@ -83,8 +83,7 @@ export const adminUpdateProfile = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("profiles")
       .update({ full_name: data.full_name, country: data.country, school: data.school })
       .eq("id", data.userId);
