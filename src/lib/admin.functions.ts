@@ -44,26 +44,6 @@ async function tryLog(
 
 // ── Users ────────────────────────────────────────────────────────────────────
 
-export const deleteUserAccount = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ userId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    if (data.userId === context.userId) {
-      throw new Error("Cannot delete your own admin account.");
-    }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // Cascade-delete profile (FKs handle submissions/achievements)
-    await supabaseAdmin.from("profiles").delete().eq("id", data.userId);
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId);
-    // Then remove auth user
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabaseAdmin as any).auth.admin.deleteUser(data.userId);
-    if (error) throw error;
-    await tryLog(context, "delete_user", { type: "user", id: data.userId });
-    return { ok: true };
-  });
-
 export const setUserRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -74,15 +54,14 @@ export const setUserRole = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     if (data.role === "admin") {
-      await supabaseAdmin
+      await context.supabase
         .from("user_roles")
         .upsert({ user_id: data.userId, role: "admin" }, { onConflict: "user_id,role" });
       await tryLog(context, "promote_to_admin", { type: "user", id: data.userId });
     } else {
-      await supabaseAdmin
+      await context.supabase
         .from("user_roles")
         .delete()
         .eq("user_id", data.userId)
@@ -104,8 +83,7 @@ export const adminUpdateProfile = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("profiles")
       .update({ full_name: data.full_name, country: data.country, school: data.school })
       .eq("id", data.userId);
@@ -131,8 +109,7 @@ export const upsertTheme = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("program_themes")
       .upsert(data, { onConflict: "year,day_number" });
     if (error) throw error;
@@ -168,11 +145,10 @@ export const saveAdminSettings = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const now = new Date().toISOString();
     const rows = data.entries.map((e) => ({ ...e, updated_at: now }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabaseAdmin as any)
+    const { error } = await (context.supabase as any)
       .from("admin_settings")
       .upsert(rows, { onConflict: "key" });
     if (error) throw error;
@@ -185,14 +161,9 @@ export const saveAdminSettings = createServerFn({ method: "POST" })
 export const getPublicSettings = createServerFn({ method: "GET" })
   .handler(async () => {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const sb = createClient(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_PUBLISHABLE_KEY!,
-        { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-      );
+      const { supabase } = await import("@/integrations/supabase/client");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (sb as any).from("admin_settings").select("key,value");
+      const { data } = await (supabase as any).from("admin_settings").select("key,value");
 
       return { settings: data ?? [] };
     } catch {
