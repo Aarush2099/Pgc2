@@ -760,6 +760,7 @@ function RegionalContextsPanel({ onCountChange }: { onCountChange: (c: { rows: n
         </table>
       </div>
     </div>
+    </>
   );
 }
 
