@@ -644,7 +644,9 @@ function RegionalContextsPanel({ onCountChange }: { onCountChange: (c: { rows: n
   const uniqueCountries = Array.from(new Set(rows.map(r => r.country))).sort();
 
   return (
-    <div className="glass-card p-5">
+    <>
+      <RegionalContextsGenerator onAfterRun={reload} />
+      <div className="glass-card p-5">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-3">
         <div>
           <p className="eyebrow">// Regional Contexts</p>
