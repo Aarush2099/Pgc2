@@ -161,14 +161,9 @@ export const saveAdminSettings = createServerFn({ method: "POST" })
 export const getPublicSettings = createServerFn({ method: "GET" })
   .handler(async () => {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const sb = createClient(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_PUBLISHABLE_KEY!,
-        { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-      );
+      const { supabase } = await import("@/integrations/supabase/client");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (sb as any).from("admin_settings").select("key,value");
+      const { data } = await (supabase as any).from("admin_settings").select("key,value");
 
       return { settings: data ?? [] };
     } catch {
