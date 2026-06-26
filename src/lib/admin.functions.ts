@@ -44,26 +44,6 @@ async function tryLog(
 
 // ── Users ────────────────────────────────────────────────────────────────────
 
-export const deleteUserAccount = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ userId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    if (data.userId === context.userId) {
-      throw new Error("Cannot delete your own admin account.");
-    }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // Cascade-delete profile (FKs handle submissions/achievements)
-    await supabaseAdmin.from("profiles").delete().eq("id", data.userId);
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId);
-    // Then remove auth user
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabaseAdmin as any).auth.admin.deleteUser(data.userId);
-    if (error) throw error;
-    await tryLog(context, "delete_user", { type: "user", id: data.userId });
-    return { ok: true };
-  });
-
 export const setUserRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -74,15 +54,14 @@ export const setUserRole = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     if (data.role === "admin") {
-      await supabaseAdmin
+      await context.supabase
         .from("user_roles")
         .upsert({ user_id: data.userId, role: "admin" }, { onConflict: "user_id,role" });
       await tryLog(context, "promote_to_admin", { type: "user", id: data.userId });
     } else {
-      await supabaseAdmin
+      await context.supabase
         .from("user_roles")
         .delete()
         .eq("user_id", data.userId)
