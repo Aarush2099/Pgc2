@@ -28,6 +28,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getFlagThumb } from "@/lib/flags";
 import { COUNTRIES } from "@/lib/countries";
 import { CountryCombobox } from "@/components/CountryCombobox";
+import { RegionalContextsGenerator } from "@/components/admin/RegionalContextsGenerator";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — PGC 2026" }] }),
