@@ -87,7 +87,7 @@ export const generateRegionalContextsBatch = createServerFn({ method: "POST" })
         .eq("day_number", dayNumber)
         .eq("year", year)
         .in("country", countries);
-      const existingSet = new Set((existing ?? []).map((r) => r.country));
+      const existingSet = new Set((existing ?? []).map((r: { country: string }) => r.country));
       countriesToProcess = countries.filter((c) => !existingSet.has(c));
     }
 
