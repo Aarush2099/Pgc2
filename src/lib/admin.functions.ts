@@ -109,8 +109,7 @@ export const upsertTheme = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("program_themes")
       .upsert(data, { onConflict: "year,day_number" });
     if (error) throw error;
