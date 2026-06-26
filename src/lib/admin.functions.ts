@@ -145,11 +145,10 @@ export const saveAdminSettings = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const now = new Date().toISOString();
     const rows = data.entries.map((e) => ({ ...e, updated_at: now }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabaseAdmin as any)
+    const { error } = await (context.supabase as any)
       .from("admin_settings")
       .upsert(rows, { onConflict: "key" });
     if (error) throw error;
