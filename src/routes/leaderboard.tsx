@@ -45,18 +45,12 @@ function Leaderboard() {
   useEffect(() => {
     let cancel = false;
     (async () => {
-      try {
-        const { data, error } = await supabase.rpc("individual_leaderboard", { _limit: 50, _offset: 0 });
-        if (cancel) return;
-        setIndividual(error ? [] : ((data as IndRow[]) ?? []));
-      } catch { if (!cancel) setIndividual([]); }
+      const { data } = await supabase.rpc("individual_leaderboard", { _limit: 50, _offset: 0 });
+      if (!cancel) setIndividual((data as IndRow[]) ?? []);
     })();
     (async () => {
-      try {
-        const { data, error } = await supabase.rpc("country_leaderboard");
-        if (cancel) return;
-        setCountries(error ? [] : ((data as CountryRow[]) ?? []));
-      } catch { if (!cancel) setCountries([]); }
+      const { data } = await supabase.rpc("country_leaderboard");
+      if (!cancel) setCountries((data as CountryRow[]) ?? []);
     })();
     return () => { cancel = true; };
   }, []);
@@ -65,10 +59,8 @@ function Leaderboard() {
     if (!user) { setMyRank(null); return; }
     let cancel = false;
     (async () => {
-      try {
-        const { data } = await supabase.rpc("user_rank", { _user_id: user.id });
-        if (!cancel) setMyRank(typeof data === "number" ? data : null);
-      } catch { if (!cancel) setMyRank(null); }
+      const { data } = await supabase.rpc("user_rank", { _user_id: user.id });
+      if (!cancel) setMyRank(typeof data === "number" ? data : null);
     })();
     return () => { cancel = true; };
   }, [user]);

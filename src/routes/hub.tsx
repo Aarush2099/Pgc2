@@ -3,8 +3,15 @@ import { Layout } from "@/components/Layout";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { ArrowRight, Microscope, Megaphone, FileDown, UserCircle2, Leaf, Users, Heart } from "lucide-react";
+import { ArrowRight, Microscope, Megaphone, FileDown, UserCircle2 } from "lucide-react";
 import { getFlagThumb } from "@/lib/flags";
+
+
+declare namespace JSX {
+  interface IntrinsicElements {
+    [elemName: string]: any;
+  }
+}
 
 export const Route = createFileRoute("/hub")({
   head: () => ({ meta: [
@@ -19,75 +26,39 @@ type Recent = {
   ai_feedback: string | null; submitted_at: string;
 };
 
-const ALUMNI_QUOTES = [
-  { q: "PGC feels like a family you want to belong to.", a: "Valentín, Ambassador 2022–2026" },
-  { q: "Climate anxiety can be transformed into collective power.", a: "Darinka, Finalist 2025" },
-  { q: "Whatever form the next chapter takes, I hope it preserves the spirit of possibility, connection, and action.", a: "Carolina, PGC 2025 Global Winner" },
-  { q: "PGC gave me the opportunity and the funds to prove myself — and that's where my journey started.", a: "Shahed, Finalist & Ambassador 2023" },
-  { q: "The friendships I formed with the other finalists have stayed with me to this day.", a: "Anjali, Ambassador 2015–2025" },
-];
-
 function Hub() {
   const { user, profile, loading } = useAuth();
   const [counts, setCounts] = useState({ research: 0, action: 0 });
   const [recent, setRecent] = useState<Recent[]>([]);
-  const [quoteIdx, setQuoteIdx] = useState(0);
-  const [fade, setFade] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      try {
-        const [{ count: r }, { count: a }, { data: rec }] = await Promise.all([
-          supabase.from("submissions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("phase", "october_research"),
-          supabase.from("submissions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("phase", "november_action"),
-          supabase.from("submissions").select("id,theme,title,phase,status,ai_feedback,submitted_at").eq("user_id", user.id).order("submitted_at", { ascending: false }).limit(5),
-        ]);
-        setCounts({ research: r ?? 0, action: a ?? 0 });
-        setRecent((rec as Recent[]) ?? []);
-      } catch { /* gracefully ignore */ }
+      const [{ count: r }, { count: a }, { data: rec }] = await Promise.all([
+        supabase.from("submissions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("phase", "october_research"),
+        supabase.from("submissions").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("phase", "november_action"),
+        supabase.from("submissions").select("id,theme,title,phase,status,ai_feedback,submitted_at").eq("user_id", user.id).order("submitted_at", { ascending: false }).limit(5),
+      ]);
+      setCounts({ research: r ?? 0, action: a ?? 0 });
+      setRecent((rec as Recent[]) ?? []);
     })();
   }, [user]);
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setFade(false);
-      window.setTimeout(() => {
-        setQuoteIdx((i) => (i + 1) % ALUMNI_QUOTES.length);
-        setFade(true);
-      }, 350);
-    }, 8000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  // Guest screen renders immediately for unauthenticated visitors —
-  // do NOT wait for loading or any database query.
-  if (!loading && !user) {
-    return (
-      <Layout>
-        <section className="container-pgc py-24">
-          <div className="mx-auto max-w-xl glass-card p-10 text-center">
-            <p className="eyebrow">// Your Hub</p>
-            <h1 className="mt-3 text-4xl md:text-5xl font-bold tracking-tight">The Hub awaits.</h1>
-            <p className="mt-4 text-muted-foreground">
-              Sign in to unlock your research dashboard, track your 30-day progress,
-              and see your country's personalised November challenges.
-            </p>
-            <div className="mt-8 flex flex-col items-center gap-3">
-              <Link to="/auth" className="btn-pgc">Sign In <ArrowRight className="size-4" /></Link>
-              <Link to="/auth" className="text-sm text-primary-dark underline">New to PGC? Create an account</Link>
-            </div>
-          </div>
-        </section>
-      </Layout>
-    );
-  }
 
   if (loading) {
     return <Layout><div className="container-pgc py-12">Loading…</div></Layout>;
   }
 
-  const quote = ALUMNI_QUOTES[quoteIdx];
+  if (!user) {
+    return (
+      <Layout>
+        <section className="container-pgc py-24 text-center max-w-xl">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Your Hub awaits.</h1>
+          <p className="mt-4 text-muted-foreground">Sign in to access your personalized Project Green Challenge dashboard.</p>
+          <Link to="/auth" className="mt-8 inline-flex btn-pgc">Sign in to access your Hub <ArrowRight className="size-4" /></Link>
+        </section>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -104,6 +75,7 @@ function Hub() {
                 </span>
               )}
             </h1>
+
           </div>
           <Link to="/profile" className="btn-outline-pgc text-sm"><UserCircle2 className="size-4" /> Profile</Link>
         </div>
@@ -139,7 +111,7 @@ function Hub() {
             <h2 className="text-xl font-bold">Recent activity</h2>
             <div className="mt-4 divide-y divide-border">
               {recent.length === 0 && <p className="text-sm text-muted-foreground py-3">No submissions yet — pick a theme to start.</p>}
-              {recent.map((r) => (
+              {recent.map((r: Recent) => (
                 <div key={r.id} className="py-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold">{r.theme} · {r.title}</p>
@@ -155,52 +127,6 @@ function Hub() {
             <h3 className="mt-3 font-bold">Academic Certificate →</h3>
             <p className="mt-1 text-xs text-muted-foreground">Download your printable certificate of participation for credit recognition.</p>
           </Link>
-        </div>
-
-        {/* Community section */}
-        <div className="mt-16">
-          <div className="text-center">
-            <p className="eyebrow">// The PGC Community</p>
-            <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight">The PGC Community</h2>
-            <p className="mt-2 text-muted-foreground">PGC doesn't end in November. The community lasts.</p>
-          </div>
-
-          <div className="mt-8 grid md:grid-cols-3 gap-5">
-            {/* Rotating quote */}
-            <div className="glass-card p-6 flex flex-col">
-              <Users className="size-6 text-primary" />
-              <div className={`mt-4 flex-1 transition-opacity duration-300 ${fade ? "opacity-100" : "opacity-0"}`}>
-                <p className="text-base leading-relaxed">"{quote.q}"</p>
-                <p className="mt-3 text-xs text-muted-foreground">— {quote.a}</p>
-              </div>
-              <Link to="/climate-action-projects" className="mt-4 text-sm text-primary-dark font-semibold inline-flex items-center gap-1">
-                Read more stories <ArrowRight className="size-4" />
-              </Link>
-            </div>
-
-            {/* Stay involved */}
-            <div className="glass-card p-6">
-              <Megaphone className="size-6 text-primary" />
-              <h3 className="mt-4 text-lg font-bold">Stay involved after November</h3>
-              <ul className="mt-3 space-y-2 text-sm">
-                <li><Link to="/campus-reps" className="text-primary-dark hover:underline">→ Apply to become a Campus Rep</Link></li>
-                <li><a href="mailto:pgc@turninggreen.org?subject=PGC%20Mentor" className="text-primary-dark hover:underline">→ Mentor next year's participants</a></li>
-                <li><a href="mailto:pgc@turninggreen.org?subject=CAP%20Showcase" className="text-primary-dark hover:underline">→ Submit your CAP project for showcasing</a></li>
-              </ul>
-            </div>
-
-            {/* You're not alone */}
-            <div className="glass-card p-6">
-              <Leaf className="size-6 text-primary" />
-              <h3 className="mt-3 text-lg font-bold inline-flex items-center gap-2">
-                <Heart className="size-4 text-primary" /> Feeling overwhelmed?
-              </h3>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                Many PGC participants come in with climate anxiety. That's not a weakness — it's why you're here.
-                The community around you has felt the same. Use the challenge to turn that energy into action.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
     </Layout>

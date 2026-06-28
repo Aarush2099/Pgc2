@@ -54,8 +54,3 @@ export function getFlagUrl(
 export function getFlagThumb(country: string | null | undefined): string {
   return getFlagUrl(country, "w40");
 }
-
-export function getFlagCode(country: string | null | undefined): string | null {
-  if (!country) return null;
-  return COUNTRY_CODES[country] ?? null;
-}
