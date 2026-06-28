@@ -2,10 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Upload, CheckCircle2, FileText, Link2, MapPin, Plus, X, Sparkles, Coffee, Clock } from "lucide-react";
+import { Upload, CheckCircle2, FileText, Link2, MapPin, Plus, X, Sparkles, Coffee, Clock, Lock, Sun, ArrowRight } from "lucide-react";
 import { sanitizeUpload, UploadValidationError } from "@/lib/upload-safety";
+import { PGC_DAYS } from "@/lib/challenges";
+import { PeerPreview } from "@/components/challenges/PeerPreview";
+import { ShareCard } from "@/components/challenges/ShareCard";
+import { getFlagCode } from "@/lib/flags";
 
 export const Route = createFileRoute("/challenges/")({
   head: () => ({ meta: [
@@ -14,6 +18,15 @@ export const Route = createFileRoute("/challenges/")({
   ]}),
   component: ChallengesPage,
 });
+
+// Fallback themes from local data when DB is empty
+const FALLBACK_THEMES: Theme[] = PGC_DAYS.map(d => ({
+  day_number: d.day,
+  theme: d.theme,
+  prompt: d.researchPrompt,
+  is_rest_day: d.isRestDay,
+  is_milestone: [9, 19, 29].includes(d.day),
+}));
 
 const YEAR = 2026;
 
