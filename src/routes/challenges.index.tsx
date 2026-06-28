@@ -80,7 +80,8 @@ function ChallengesPage() {
         .eq("year", YEAR)
         .order("day_number");
       if (error) toast.error(error.message);
-      else setThemes((data as Theme[]) ?? []);
+      const rows = (data as Theme[]) ?? [];
+      setThemes(rows.length > 0 ? rows : FALLBACK_THEMES);
     })();
   }, []);
 
@@ -146,11 +147,30 @@ function ChallengesPage() {
         </div>
 
         {!user && (
-          <div className="mt-8 glass-card p-6 max-w-xl">
-            <p className="text-sm">
-              <Link to="/auth" className="text-primary-dark font-semibold underline">Sign in or create an account</Link> to upload submissions.
-            </p>
-          </div>
+          <>
+            <div className="mt-8 glass-card p-6 max-w-xl">
+              <p className="text-sm">
+                <Link to="/auth" className="text-primary-dark font-semibold underline">Sign in or create an account</Link> to upload submissions. Preview the 30-day program below.
+              </p>
+            </div>
+            <div className="mt-8 grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+              {(themes.length > 0 ? themes : FALLBACK_THEMES).map((t) => {
+                const isRest = t.is_rest_day;
+                const href = isRest
+                  ? "/auth"
+                  : `/auth?msg=${encodeURIComponent(`Create a free account to submit your research for Day ${t.day_number}: ${t.theme}.`)}`;
+                return (
+                  <Link key={t.day_number} to={href} className="relative glass-card p-4 hover:bg-primary/5 transition group">
+                    <div className="text-xs text-muted-foreground">Day {t.day_number}</div>
+                    <div className="mt-1 font-bold text-sm leading-snug">{isRest ? "Rest Day" : t.theme}</div>
+                    <div className="absolute top-2 right-2 opacity-70 group-hover:opacity-100">
+                      {isRest ? <Sun className="w-4 h-4 text-amber-500" /> : <Lock className="w-3.5 h-3.5" />}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </>
         )}
         {user && !profile?.country && (
           <div className="mt-8 glass-card p-6 max-w-xl">
@@ -160,21 +180,23 @@ function ChallengesPage() {
           </div>
         )}
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
-          {themes.map((t) => {
-            const phase = tab === "research" ? "october_research" : "november_action";
-            const mine = subs.filter(s => s.day_number === t.day_number && s.phase === phase);
-            return tab === "research" ? (
-              <ResearchCard key={`r-${t.day_number}`} theme={t} mySubs={mine} canSubmit={!!user} defaultLocation={profile?.country ?? ""}
-                regional={regional[t.day_number]} country={profile?.country ?? null}
-                onSaved={(s) => setSubs(prev => [s, ...prev])} />
-            ) : (
-              <ActionCard key={`a-${t.day_number}`} theme={t} mySubs={mine} myResearch={subs.filter(s => s.phase === "october_research" && s.day_number === t.day_number)}
-                canSubmit={!!user && !!profile?.country} country={profile?.country ?? null}
-                challenge={novChallenges[t.day_number]} onSaved={(s) => setSubs(prev => [s, ...prev])} />
-            );
-          })}
-        </div>
+        {user && (
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            {themes.map((t) => {
+              const phase = tab === "research" ? "october_research" : "november_action";
+              const mine = subs.filter(s => s.day_number === t.day_number && s.phase === phase);
+              return tab === "research" ? (
+                <ResearchCard key={`r-${t.day_number}`} theme={t} mySubs={mine} canSubmit={!!user} defaultLocation={profile?.country ?? ""}
+                  regional={regional[t.day_number]} country={profile?.country ?? null}
+                  onSaved={(s) => setSubs(prev => [s, ...prev])} />
+              ) : (
+                <ActionCard key={`a-${t.day_number}`} theme={t} mySubs={mine} myResearch={subs.filter(s => s.phase === "october_research" && s.day_number === t.day_number)}
+                  canSubmit={!!user && !!profile?.country} country={profile?.country ?? null}
+                  challenge={novChallenges[t.day_number]} onSaved={(s) => setSubs(prev => [s, ...prev])} />
+              );
+            })}
+          </div>
+        )}
 
       </section>
     </Layout>
