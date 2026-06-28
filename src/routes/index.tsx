@@ -16,10 +16,10 @@ export const Route = createFileRoute("/")({
 });
 
 const WINNERS = [
-  { name: "Carolina Novillo Bravo", title: "PGC 2025 Champion", loc: "Cuenca, Ecuador" },
-  { name: "Monica Annim", title: "PGC 2025 Second Place", loc: "Koforidua, Ghana" },
-  { name: "Aarush Mahajan", title: "PGC 2025 Third Place (Tie)", loc: "Pune, India" },
-  { name: "Charles Amoani-Antwi", title: "PGC 2025 Third Place (Tie)", loc: "Kumasi, Ghana" },
+  { name: "Carolina Novillo Bravo", title: "PGC 2025 Champion", loc: "Cuenca, Ecuador", initials: "CN", flag: "ec" },
+  { name: "Monica Annim", title: "PGC 2025 Second Place", loc: "Koforidua, Ghana", initials: "MA", flag: "gh" },
+  { name: "Aarush Mahajan", title: "PGC 2025 Third Place (Tie)", loc: "Pune, India", initials: "AM", flag: "in" },
+  { name: "Charles Amoani-Antwi", title: "PGC 2025 Third Place (Tie)", loc: "Kumasi, Ghana", initials: "CA", flag: "gh" },
 ];
 
 const STATS: { n: number; display: string; l: string }[] = [
@@ -178,8 +178,18 @@ function Home() {
         <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-5">
           {WINNERS.map(w => (
             <div key={w.name} className="glass-card pgc-card p-4">
-              <div className="aspect-square w-full rounded-2xl bg-gradient-to-br from-mint/40 to-primary/20 grid place-items-center border border-white/60">
-                <span className="font-mono text-xs uppercase tracking-widest text-primary-dark/60">photo</span>
+              <div className="aspect-square w-full rounded-2xl bg-gradient-to-br from-mint/40 to-primary/20 grid place-items-center border border-white/60 relative">
+                <div
+                  className="grid place-items-center rounded-full text-white font-bold"
+                  style={{ width: 80, height: 80, backgroundColor: "hsl(150,35%,15%)", fontSize: 20 }}
+                >
+                  {w.initials}
+                </div>
+                <img
+                  src={`https://flagcdn.com/w40/${w.flag}.png`}
+                  alt={`${w.loc} flag`}
+                  className="absolute bottom-2 right-2 h-6 w-auto rounded-sm border border-white/60 shadow"
+                />
               </div>
               <p className="mt-4 font-bold leading-tight">{w.name}</p>
               <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-primary-dark">{w.title}</p>

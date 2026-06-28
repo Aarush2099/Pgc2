@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Layout } from "@/components/Layout";
 
 export const Route = createFileRoute("/faq")({
@@ -43,6 +44,7 @@ const SECTIONS: { title: string; items: { q: string; a: string }[] }[] = [
 ];
 
 function FAQ() {
+  const [intlOpen, setIntlOpen] = useState(false);
   return (
     <Layout>
       <section className="container-pgc py-16 max-w-4xl">
@@ -62,6 +64,57 @@ function FAQ() {
               </dl>
             </div>
           ))}
+        </div>
+
+        {/* International participants */}
+        <div className="mt-14 doodle-card p-6">
+          <button
+            onClick={() => setIntlOpen(o => !o)}
+            className="w-full flex items-center justify-between text-left"
+            aria-expanded={intlOpen}
+          >
+            <h2 className="text-2xl font-bold text-primary-dark">Participating from outside the United States?</h2>
+            <span className="text-2xl font-bold text-primary-dark">{intlOpen ? "–" : "+"}</span>
+          </button>
+          {intlOpen && (
+            <div className="mt-6 space-y-6 text-sm">
+              <div>
+                <h3 className="font-bold text-base">Visa & Finals Travel</h3>
+                <p className="mt-1 text-muted-foreground leading-relaxed">
+                  If selected as a finalist, you'll receive notification by October 31.
+                  We strongly recommend beginning your US visa application immediately upon
+                  notification — standard B-1/B-2 tourist visa processing can take 3–8 weeks
+                  depending on your country. PGC will provide an official invitation letter within
+                  48 hours of your finalist confirmation to support your application.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-bold text-base">Submission Windows</h3>
+                <p className="mt-1 text-muted-foreground leading-relaxed">
+                  All daily challenges open at 6am PST. We understand this may fall at
+                  an inconvenient hour in your timezone. Submissions are accepted for 24 hours
+                  or more — check the specific challenge for its closing time.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-bold text-base">Language</h3>
+                <p className="mt-1 text-muted-foreground leading-relaxed">
+                  Submissions may be made in English. If English is not your first language,
+                  do your best — your ideas matter more than perfect grammar. Judges are instructed
+                  to evaluate content and impact, not language perfection.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-bold text-base">Team Submissions</h3>
+                <p className="mt-1 text-muted-foreground leading-relaxed">
+                  If submitting as a team, designate one representative per submission.
+                  All team members should be listed in the submission description. Only the
+                  designated representative will appear on the leaderboard, but the full team
+                  will be recognised at judging.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </Layout>
