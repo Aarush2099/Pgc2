@@ -19,14 +19,6 @@ export const Route = createFileRoute("/challenges/")({
   component: ChallengesPage,
 });
 
-// Fallback themes from local data when DB is empty
-const FALLBACK_THEMES: Theme[] = PGC_DAYS.map(d => ({
-  day_number: d.day,
-  theme: d.theme,
-  prompt: d.researchPrompt,
-  is_rest_day: d.isRestDay,
-  is_milestone: [9, 19, 29].includes(d.day),
-}));
 
 const YEAR = 2026;
 
