@@ -2,10 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Upload, CheckCircle2, FileText, Link2, MapPin, Plus, X, Sparkles, Coffee, Clock } from "lucide-react";
+import { Upload, CheckCircle2, FileText, Link2, MapPin, Plus, X, Sparkles, Coffee, Clock, Lock, Sun, ArrowRight } from "lucide-react";
 import { sanitizeUpload, UploadValidationError } from "@/lib/upload-safety";
+import { PGC_DAYS } from "@/lib/challenges";
+import { PeerPreview } from "@/components/challenges/PeerPreview";
+import { ShareCard } from "@/components/challenges/ShareCard";
+import { getFlagCode } from "@/lib/flags";
 
 export const Route = createFileRoute("/challenges/")({
   head: () => ({ meta: [
@@ -15,10 +19,20 @@ export const Route = createFileRoute("/challenges/")({
   component: ChallengesPage,
 });
 
+
 const YEAR = 2026;
 
 type Theme = { day_number: number; theme: string; prompt: string | null; is_rest_day: boolean; is_milestone: boolean };
 type RegionalContext = { context_headline: string; context_body: string; priority: string };
+
+// Fallback themes from local data when DB is empty
+const FALLBACK_THEMES: Theme[] = PGC_DAYS.map(d => ({
+  day_number: d.day,
+  theme: d.theme,
+  prompt: d.researchPrompt,
+  is_rest_day: d.isRestDay,
+  is_milestone: [9, 19, 29].includes(d.day),
+}));
 
 type Sub = {
   id: string;
@@ -66,7 +80,8 @@ function ChallengesPage() {
         .eq("year", YEAR)
         .order("day_number");
       if (error) toast.error(error.message);
-      else setThemes((data as Theme[]) ?? []);
+      const rows = (data as Theme[]) ?? [];
+      setThemes(rows.length > 0 ? rows : FALLBACK_THEMES);
     })();
   }, []);
 
@@ -132,11 +147,30 @@ function ChallengesPage() {
         </div>
 
         {!user && (
-          <div className="mt-8 glass-card p-6 max-w-xl">
-            <p className="text-sm">
-              <Link to="/auth" className="text-primary-dark font-semibold underline">Sign in or create an account</Link> to upload submissions.
-            </p>
-          </div>
+          <>
+            <div className="mt-8 glass-card p-6 max-w-xl">
+              <p className="text-sm">
+                <Link to="/auth" className="text-primary-dark font-semibold underline">Sign in or create an account</Link> to upload submissions. Preview the 30-day program below.
+              </p>
+            </div>
+            <div className="mt-8 grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+              {(themes.length > 0 ? themes : FALLBACK_THEMES).map((t) => {
+                const isRest = t.is_rest_day;
+                const href = isRest
+                  ? "/auth"
+                  : `/auth?msg=${encodeURIComponent(`Create a free account to submit your research for Day ${t.day_number}: ${t.theme}.`)}`;
+                return (
+                  <Link key={t.day_number} to={href} className="relative glass-card p-4 hover:bg-primary/5 transition group">
+                    <div className="text-xs text-muted-foreground">Day {t.day_number}</div>
+                    <div className="mt-1 font-bold text-sm leading-snug">{isRest ? "Rest Day" : t.theme}</div>
+                    <div className="absolute top-2 right-2 opacity-70 group-hover:opacity-100">
+                      {isRest ? <Sun className="w-4 h-4 text-amber-500" /> : <Lock className="w-3.5 h-3.5" />}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </>
         )}
         {user && !profile?.country && (
           <div className="mt-8 glass-card p-6 max-w-xl">
@@ -146,21 +180,23 @@ function ChallengesPage() {
           </div>
         )}
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
-          {themes.map((t) => {
-            const phase = tab === "research" ? "october_research" : "november_action";
-            const mine = subs.filter(s => s.day_number === t.day_number && s.phase === phase);
-            return tab === "research" ? (
-              <ResearchCard key={`r-${t.day_number}`} theme={t} mySubs={mine} canSubmit={!!user} defaultLocation={profile?.country ?? ""}
-                regional={regional[t.day_number]} country={profile?.country ?? null}
-                onSaved={(s) => setSubs(prev => [s, ...prev])} />
-            ) : (
-              <ActionCard key={`a-${t.day_number}`} theme={t} mySubs={mine} myResearch={subs.filter(s => s.phase === "october_research" && s.day_number === t.day_number)}
-                canSubmit={!!user && !!profile?.country} country={profile?.country ?? null}
-                challenge={novChallenges[t.day_number]} onSaved={(s) => setSubs(prev => [s, ...prev])} />
-            );
-          })}
-        </div>
+        {user && (
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            {themes.map((t) => {
+              const phase = tab === "research" ? "october_research" : "november_action";
+              const mine = subs.filter(s => s.day_number === t.day_number && s.phase === phase);
+              return tab === "research" ? (
+                <ResearchCard key={`r-${t.day_number}`} theme={t} mySubs={mine} canSubmit={!!user} defaultLocation={profile?.country ?? ""}
+                  regional={regional[t.day_number]} country={profile?.country ?? null}
+                  onSaved={(s) => setSubs(prev => [s, ...prev])} />
+              ) : (
+                <ActionCard key={`a-${t.day_number}`} theme={t} mySubs={mine} myResearch={subs.filter(s => s.phase === "october_research" && s.day_number === t.day_number)}
+                  canSubmit={!!user && !!profile?.country} country={profile?.country ?? null}
+                  challenge={novChallenges[t.day_number]} onSaved={(s) => setSubs(prev => [s, ...prev])} />
+              );
+            })}
+          </div>
+        )}
 
       </section>
     </Layout>
