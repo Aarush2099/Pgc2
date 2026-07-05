@@ -6,6 +6,15 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Upload, CheckCircle2, FileText, Link2, MapPin, Plus, X, Sparkles, Coffee, Clock } from "lucide-react";
 import { sanitizeUpload, UploadValidationError } from "@/lib/upload-safety";
+import { PGC_DAYS } from "@/lib/challenges";
+
+const FALLBACK_THEMES: Theme[] = PGC_DAYS.map(d => ({
+  day_number: d.day,
+  theme: d.theme,
+  prompt: d.researchPrompt,
+  is_rest_day: d.isRestDay,
+  is_milestone: false,
+}));
 
 export const Route = createFileRoute("/challenges/")({
   head: () => ({ meta: [
