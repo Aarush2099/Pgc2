@@ -9,8 +9,10 @@ import { sanitizeUpload, UploadValidationError } from "@/lib/upload-safety";
 
 export const Route = createFileRoute("/challenges/")({
   head: () => ({ meta: [
-    { title: "Challenges & Research — PGC" },
+    { title: "Challenges & Research — PGC 2026" },
     { name: "description", content: "October research informs AI-designed November action — same 30 themes, paired 1:1 per country." },
+    { property: "og:title", content: "Challenges & Research — PGC 2026" },
+    { property: "og:description", content: "October research informs AI-designed November action — same 30 themes, paired 1:1 per country." },
   ]}),
   component: ChallengesPage,
 });

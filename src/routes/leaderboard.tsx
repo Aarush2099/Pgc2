@@ -11,6 +11,8 @@ export const Route = createFileRoute("/leaderboard")({
     meta: [
       { title: "Global Leaderboard — PGC 2026" },
       { name: "description", content: "Live PGC 2026 leaderboard — top individual students and top countries, ranked by points earned through submissions." },
+      { property: "og:title", content: "Global Leaderboard — PGC 2026" },
+      { property: "og:description", content: "Live PGC 2026 leaderboard — top individual students and top countries, ranked by points earned through submissions." },
     ],
   }),
   component: Leaderboard,

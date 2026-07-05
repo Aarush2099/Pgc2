@@ -17,6 +17,8 @@ export const Route = createFileRoute("/hub")({
   head: () => ({ meta: [
     { title: "Your Hub — PGC 2026" },
     { name: "description", content: "Your personal Hub for Project Green Challenge — research, action, and your submissions." },
+    { property: "og:title", content: "Your Hub — PGC 2026" },
+    { property: "og:description", content: "Your personal Hub for Project Green Challenge — research, action, and your submissions." },
   ]}),
   component: Hub,
 });
