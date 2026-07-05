@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/auth";
 import { BrandMark } from "./BrandMark";
 
 const NAV = [
-  { to: "/", label: "Home" },
   { to: "/hub", label: "The Hub" },
   { to: "/challenges", label: "Challenges & Research" },
   { to: "/leaderboard", label: "Leaderboard" },
@@ -49,9 +48,8 @@ export function Header() {
         <nav className="hidden lg:flex items-center gap-1 ml-2">
           {NAV.map((n) => (
             <Link key={n.to + n.label} to={n.to}
-              className="nav-link px-3 py-2 text-sm font-medium text-foreground/75 hover:text-foreground rounded-full transition-colors"
-              activeProps={{ className: "nav-link is-active text-[var(--leaf)] px-3 py-2 text-sm font-medium rounded-full" }}
-              activeOptions={{ exact: n.to === "/" }}>
+              className="nav-link relative px-3 py-2 text-sm font-medium text-foreground/75 hover:text-foreground transition-colors"
+              activeProps={{ className: "nav-link is-active relative px-3 py-2 text-sm font-medium text-[var(--leaf)] nav-active-underline" }}>
               {n.label}
             </Link>
           ))}
@@ -103,9 +101,8 @@ export function Header() {
             </Link>
           ) : (
             <button onClick={() => navigate({ to: "/auth" })}
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white"
-              style={{ background: "linear-gradient(135deg, var(--leaf), #0BAA73)" }}>
-              <LogIn className="size-4" /> Sign In
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[var(--leaf)] border border-[var(--leaf)]/60 hover:bg-[var(--leaf)] hover:text-white transition-colors">
+              <LogIn className="size-3.5" /> Sign In
             </button>
           )}
 
