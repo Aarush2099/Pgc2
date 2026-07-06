@@ -9,10 +9,7 @@ import { toPng } from "html-to-image";
 import { getFlagUrl } from "@/lib/flags";
 
 export const Route = createFileRoute("/_authenticated/certificate")({
-  head: () => ({ meta: [
-    { title: "Academic Certificate — PGC 2026" },
-    { property: "og:title", content: "Academic Certificate — PGC 2026" },
-  ]}),
+  head: () => ({ meta: [{ title: "Academic Certificate — PGC 2026" }] }),
   component: CertificatePage,
 });
 

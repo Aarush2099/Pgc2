@@ -12,10 +12,7 @@ import { getFlagUrl } from "@/lib/flags";
 import { CountryCombobox } from "@/components/CountryCombobox";
 
 export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [
-    { title: "Your Climate Passport — PGC 2026" },
-    { property: "og:title", content: "Your Climate Passport — PGC 2026" },
-  ]}),
+  head: () => ({ meta: [{ title: "Climate Passport — PGC 2026" }] }),
   component: ProfilePage,
 });
 

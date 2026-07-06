@@ -6,22 +6,11 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Upload, CheckCircle2, FileText, Link2, MapPin, Plus, X, Sparkles, Coffee, Clock } from "lucide-react";
 import { sanitizeUpload, UploadValidationError } from "@/lib/upload-safety";
-import { PGC_DAYS } from "@/lib/challenges";
-
-const FALLBACK_THEMES: Theme[] = PGC_DAYS.map(d => ({
-  day_number: d.day,
-  theme: d.theme,
-  prompt: d.researchPrompt,
-  is_rest_day: d.isRestDay,
-  is_milestone: false,
-}));
 
 export const Route = createFileRoute("/challenges/")({
   head: () => ({ meta: [
-    { title: "Challenges & Research — PGC 2026" },
+    { title: "Challenges & Research — PGC" },
     { name: "description", content: "October research informs AI-designed November action — same 30 themes, paired 1:1 per country." },
-    { property: "og:title", content: "Challenges & Research — PGC 2026" },
-    { property: "og:description", content: "October research informs AI-designed November action — same 30 themes, paired 1:1 per country." },
   ]}),
   component: ChallengesPage,
 });
@@ -64,76 +53,60 @@ type CountryChallenge = {
 function ChallengesPage() {
   const { user, profile } = useAuth();
   const [tab, setTab] = useState<"research" | "action">("research");
-  const [themes, setThemes] = useState<Theme[]>(FALLBACK_THEMES);
-  const [dbError, setDbError] = useState(false);
+  const [themes, setThemes] = useState<Theme[]>([]);
   const [subs, setSubs] = useState<Sub[]>([]);
   const [novChallenges, setNovChallenges] = useState<Record<number, CountryChallenge>>({});
   const [regional, setRegional] = useState<Record<number, RegionalContext>>({});
 
   useEffect(() => {
     (async () => {
-      try {
-        const { data, error } = await supabase
-          .from("program_themes")
-          .select("day_number,theme,prompt,is_rest_day,is_milestone")
-          .eq("year", YEAR)
-          .order("day_number");
-        if (error || !data || data.length === 0) {
-          setThemes(FALLBACK_THEMES);
-          if (error) setDbError(true);
-        } else {
-          setThemes(data as Theme[]);
-        }
-      } catch {
-        setThemes(FALLBACK_THEMES);
-        setDbError(true);
-      }
+      const { data, error } = await supabase
+        .from("program_themes")
+        .select("day_number,theme,prompt,is_rest_day,is_milestone")
+        .eq("year", YEAR)
+        .order("day_number");
+      if (error) toast.error(error.message);
+      else setThemes((data as Theme[]) ?? []);
     })();
   }, []);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      try {
-        const { data } = await supabase
-          .from("submissions")
-          .select("id,phase,day_number,theme,type,title,description,location,key_findings,data_sources,source_links,attachment_paths,status,ai_feedback,ai_next_steps")
-          .eq("user_id", user.id)
-          .order("submitted_at", { ascending: false });
-        setSubs((data as Sub[]) ?? []);
-      } catch { setSubs([]); }
+      const { data } = await supabase
+        .from("submissions")
+        .select("id,phase,day_number,theme,type,title,description,location,key_findings,data_sources,source_links,attachment_paths,status,ai_feedback,ai_next_steps")
+        .eq("user_id", user.id)
+        .order("submitted_at", { ascending: false });
+      setSubs((data as Sub[]) ?? []);
     })();
   }, [user]);
 
   useEffect(() => {
     if (!user || !profile?.country) return;
     (async () => {
-      try {
-        const { data } = await supabase
-          .from("country_challenges")
-          .select("day_number,theme,status,prompt,summary,title,brief,action_prompt,success_criteria")
-          .eq("year", YEAR)
-          .eq("country", profile.country!);
-        const map: Record<number, CountryChallenge> = {};
-        ((data as CountryChallenge[]) ?? []).forEach(c => { map[c.day_number] = c; });
-        setNovChallenges(map);
-      } catch { setNovChallenges({}); }
+      const { data } = await supabase
+        .from("country_challenges")
+        .select("day_number,theme,status,prompt,summary,title,brief,action_prompt,success_criteria")
+        .eq("year", YEAR)
+        .eq("country", profile.country!);
+      const map: Record<number, CountryChallenge> = {};
+      ((data as CountryChallenge[]) ?? []).forEach(c => { map[c.day_number] = c; });
+      setNovChallenges(map);
     })();
   }, [user, profile?.country]);
 
   useEffect(() => {
     if (!user || !profile?.country) return;
     (async () => {
-      try {
-        const { data } = await supabase
-          .from("regional_contexts")
-          .select("day_number,context_headline,context_body,priority")
-          .eq("country", profile.country!)
-          .eq("year", YEAR);
-        const map: Record<number, RegionalContext> = {};
-        ((data as Array<{ day_number: number } & RegionalContext>) ?? []).forEach(r => { map[r.day_number] = r; });
-        setRegional(map);
-      } catch { setRegional({}); }
+      const { data } = await supabase
+        .from("regional_contexts")
+        .select("day_number,context_headline,context_body,priority")
+        .eq("country", profile.country!)
+        .eq("year", YEAR);
+      const map: Record<number, RegionalContext> = {};
+      ((data as Array<{ day_number: number } & RegionalContext>) ?? []).forEach(r => { map[r.day_number] = r; });
+      setRegional(map);
     })();
   }, [user, profile?.country]);
 
@@ -148,16 +121,6 @@ function ChallengesPage() {
           <br />
           <b>November — Action:</b> Day N is an AI-designed challenge built from what students in your country uncovered on October Day N.
         </p>
-
-        {dbError && (
-          <div className="mt-6 flex items-start gap-3 rounded-lg border border-amber-400/40 bg-amber-400/10 p-3 text-sm text-amber-200">
-            <span aria-hidden>⚠</span>
-            <span className="flex-1">
-              Showing default challenge themes — your submissions will sync once the database connection is restored.
-            </span>
-            <button onClick={() => setDbError(false)} className="text-amber-400 hover:text-amber-200" aria-label="Dismiss">✕</button>
-          </div>
-        )}
 
         <div className="mt-8 inline-flex p-1 rounded-full glass-card">
           {(["research", "action"] as const).map((k) => (

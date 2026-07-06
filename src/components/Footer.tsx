@@ -55,7 +55,7 @@ export function Footer() {
         <div className="py-6 text-xs text-foreground/60 flex flex-col sm:flex-row gap-2 justify-between">
           <span>A Program of Turning Green © 2026</span>
           <span className="inline-flex items-center gap-1.5">
-            <Heart className="size-3.5 text-[var(--leaf)]" /> Built by students, for students · #PGC2026
+            <Heart className="size-3.5 text-[var(--leaf)]" /> Made with care · #PGC
           </span>
         </div>
       </div>
