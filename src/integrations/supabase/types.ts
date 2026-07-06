@@ -14,16 +14,167 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_emails: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          country: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          school: string | null
+          updated_at: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["app_role"]
+          school?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          school?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      submission_links: {
+        Row: {
+          created_at: string
+          policy_submission_id: string
+          research_submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          policy_submission_id: string
+          research_submission_id: string
+        }
+        Update: {
+          created_at?: string
+          policy_submission_id?: string
+          research_submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_links_policy_submission_id_fkey"
+            columns: ["policy_submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submission_links_research_submission_id_fkey"
+            columns: ["research_submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submissions: {
+        Row: {
+          ai_feedback: string | null
+          ai_next_steps: string | null
+          country: string | null
+          day_number: number | null
+          description: string | null
+          id: string
+          media_url: string | null
+          phase: Database["public"]["Enums"]["submission_phase"]
+          reviewed_at: string | null
+          status: Database["public"]["Enums"]["submission_status"]
+          submitted_at: string
+          theme: string
+          title: string
+          type: Database["public"]["Enums"]["submission_type"]
+          user_id: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          ai_next_steps?: string | null
+          country?: string | null
+          day_number?: number | null
+          description?: string | null
+          id?: string
+          media_url?: string | null
+          phase: Database["public"]["Enums"]["submission_phase"]
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string
+          theme: string
+          title: string
+          type: Database["public"]["Enums"]["submission_type"]
+          user_id: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          ai_next_steps?: string | null
+          country?: string | null
+          day_number?: number | null
+          description?: string | null
+          id?: string
+          media_url?: string | null
+          phase?: Database["public"]["Enums"]["submission_phase"]
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string
+          theme?: string
+          title?: string
+          type?: Database["public"]["Enums"]["submission_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "admin"
+      submission_phase: "october_research" | "november_action"
+      submission_status: "submitted" | "reviewed"
+      submission_type: "regional_audit" | "policy_change"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +301,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "admin"],
+      submission_phase: ["october_research", "november_action"],
+      submission_status: ["submitted", "reviewed"],
+      submission_type: ["regional_audit", "policy_change"],
+    },
   },
 } as const
