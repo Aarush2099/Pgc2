@@ -38,6 +38,85 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_actions: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          target_country: string | null
+          target_day_number: number | null
+          target_theme: string | null
+          target_type: string | null
+          target_year: number | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_country?: string | null
+          target_day_number?: number | null
+          target_theme?: string | null
+          target_type?: string | null
+          target_year?: number | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_country?: string | null
+          target_day_number?: number | null
+          target_theme?: string | null
+          target_type?: string | null
+          target_year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       country_challenges: {
         Row: {
           action_prompt: string | null
@@ -158,6 +237,7 @@ export type Database = {
         Row: {
           created_at: string
           day_number: number
+          is_milestone: boolean
           is_rest_day: boolean
           prompt: string | null
           theme: string
@@ -166,6 +246,7 @@ export type Database = {
         Insert: {
           created_at?: string
           day_number: number
+          is_milestone?: boolean
           is_rest_day?: boolean
           prompt?: string | null
           theme: string
@@ -174,9 +255,49 @@ export type Database = {
         Update: {
           created_at?: string
           day_number?: number
+          is_milestone?: boolean
           is_rest_day?: boolean
           prompt?: string | null
           theme?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      regional_contexts: {
+        Row: {
+          context_body: string
+          context_headline: string
+          country: string
+          created_at: string
+          day_number: number
+          id: string
+          priority: string
+          theme: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          context_body: string
+          context_headline: string
+          country: string
+          created_at?: string
+          day_number: number
+          id?: string
+          priority?: string
+          theme: string
+          updated_at?: string
+          year?: number
+        }
+        Update: {
+          context_body?: string
+          context_headline?: string
+          country?: string
+          created_at?: string
+          day_number?: number
+          id?: string
+          priority?: string
+          theme?: string
+          updated_at?: string
           year?: number
         }
         Relationships: []
