@@ -14,28 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      admin_emails: {
+      achievements: {
         Row: {
-          created_at: string
-          email: string
+          code: string
+          description: string
+          icon: string | null
+          name: string
+          sort_order: number
         }
         Insert: {
-          created_at?: string
-          email: string
+          code: string
+          description: string
+          icon?: string | null
+          name: string
+          sort_order?: number
         }
         Update: {
-          created_at?: string
-          email?: string
+          code?: string
+          description?: string
+          icon?: string | null
+          name?: string
+          sort_order?: number
         }
         Relationships: []
+      }
+      country_challenges: {
+        Row: {
+          action_prompt: string | null
+          approved_at: string | null
+          approved_by: string | null
+          brief: string | null
+          country: string
+          created_at: string
+          day_number: number
+          generated_at: string | null
+          prompt: string | null
+          small_sample: boolean | null
+          source_research_ids: string[] | null
+          status: string
+          submission_count: number | null
+          success_criteria: string | null
+          summary: string | null
+          theme: string
+          title: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          action_prompt?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          brief?: string | null
+          country: string
+          created_at?: string
+          day_number: number
+          generated_at?: string | null
+          prompt?: string | null
+          small_sample?: boolean | null
+          source_research_ids?: string[] | null
+          status?: string
+          submission_count?: number | null
+          success_criteria?: string | null
+          summary?: string | null
+          theme: string
+          title?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          action_prompt?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          brief?: string | null
+          country?: string
+          created_at?: string
+          day_number?: number
+          generated_at?: string | null
+          prompt?: string | null
+          small_sample?: boolean | null
+          source_research_ids?: string[] | null
+          status?: string
+          submission_count?: number | null
+          success_criteria?: string | null
+          summary?: string | null
+          theme?: string
+          title?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "country_challenges_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
           country: string | null
           created_at: string
           email: string
+          first_submission_at: string | null
           full_name: string | null
           id: string
+          participant_number: string
+          points: number
           role: Database["public"]["Enums"]["app_role"]
           school: string | null
           updated_at: string
@@ -44,8 +130,11 @@ export type Database = {
           country?: string | null
           created_at?: string
           email: string
+          first_submission_at?: string | null
           full_name?: string | null
           id: string
+          participant_number?: string
+          points?: number
           role?: Database["public"]["Enums"]["app_role"]
           school?: string | null
           updated_at?: string
@@ -54,11 +143,41 @@ export type Database = {
           country?: string | null
           created_at?: string
           email?: string
+          first_submission_at?: string | null
           full_name?: string | null
           id?: string
+          participant_number?: string
+          points?: number
           role?: Database["public"]["Enums"]["app_role"]
           school?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      program_themes: {
+        Row: {
+          created_at: string
+          day_number: number
+          is_rest_day: boolean
+          prompt: string | null
+          theme: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          day_number: number
+          is_rest_day?: boolean
+          prompt?: string | null
+          theme: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          day_number?: number
+          is_rest_day?: boolean
+          prompt?: string | null
+          theme?: string
+          year?: number
         }
         Relationships: []
       }
@@ -99,69 +218,132 @@ export type Database = {
         Row: {
           ai_feedback: string | null
           ai_next_steps: string | null
+          attachment_paths: string[] | null
           country: string | null
+          data_sources: string | null
           day_number: number | null
           description: string | null
           id: string
+          key_findings: string | null
+          location: string | null
           media_url: string | null
-          phase: Database["public"]["Enums"]["submission_phase"]
-          reviewed_at: string | null
-          status: Database["public"]["Enums"]["submission_status"]
+          phase: string
+          source_links: string[] | null
+          status: string
           submitted_at: string
           theme: string
           title: string
-          type: Database["public"]["Enums"]["submission_type"]
+          type: string
+          updated_at: string
           user_id: string
         }
         Insert: {
           ai_feedback?: string | null
           ai_next_steps?: string | null
+          attachment_paths?: string[] | null
           country?: string | null
+          data_sources?: string | null
           day_number?: number | null
           description?: string | null
           id?: string
+          key_findings?: string | null
+          location?: string | null
           media_url?: string | null
-          phase: Database["public"]["Enums"]["submission_phase"]
-          reviewed_at?: string | null
-          status?: Database["public"]["Enums"]["submission_status"]
+          phase: string
+          source_links?: string[] | null
+          status?: string
           submitted_at?: string
           theme: string
           title: string
-          type: Database["public"]["Enums"]["submission_type"]
+          type?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
           ai_feedback?: string | null
           ai_next_steps?: string | null
+          attachment_paths?: string[] | null
           country?: string | null
+          data_sources?: string | null
           day_number?: number | null
           description?: string | null
           id?: string
+          key_findings?: string | null
+          location?: string | null
           media_url?: string | null
-          phase?: Database["public"]["Enums"]["submission_phase"]
-          reviewed_at?: string | null
-          status?: Database["public"]["Enums"]["submission_status"]
+          phase?: string
+          source_links?: string[] | null
+          status?: string
           submitted_at?: string
           theme?: string
           title?: string
-          type?: Database["public"]["Enums"]["submission_type"]
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          code: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          unlocked_at?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "submissions_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "user_achievements_code_fkey"
+            columns: ["code"]
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: "achievements"
+            referencedColumns: ["code"]
           },
         ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      country_leaderboard: {
+        Args: never
+        Returns: {
+          country: string
+          participants: number
+          rank: number
+          total_points: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -169,12 +351,21 @@ export type Database = {
         }
         Returns: boolean
       }
+      individual_leaderboard: {
+        Args: { _limit?: number; _offset?: number }
+        Returns: {
+          country: string
+          full_name: string
+          id: string
+          participant_number: string
+          points: number
+          rank: number
+        }[]
+      }
+      user_rank: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       app_role: "student" | "admin"
-      submission_phase: "october_research" | "november_action"
-      submission_status: "submitted" | "reviewed"
-      submission_type: "regional_audit" | "policy_change"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -303,9 +494,6 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["student", "admin"],
-      submission_phase: ["october_research", "november_action"],
-      submission_status: ["submitted", "reviewed"],
-      submission_type: ["regional_audit", "policy_change"],
     },
   },
 } as const
