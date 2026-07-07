@@ -194,42 +194,6 @@ export type Database = {
           },
         ]
       }
-      generation_error_log: {
-        Row: {
-          country: string | null
-          created_at: string
-          created_by: string | null
-          day_number: number | null
-          error: string
-          id: string
-          run_id: string
-          scope: string
-          theme: string | null
-        }
-        Insert: {
-          country?: string | null
-          created_at?: string
-          created_by?: string | null
-          day_number?: number | null
-          error: string
-          id?: string
-          run_id: string
-          scope: string
-          theme?: string | null
-        }
-        Update: {
-          country?: string | null
-          created_at?: string
-          created_by?: string | null
-          day_number?: number | null
-          error?: string
-          id?: string
-          run_id?: string
-          scope?: string
-          theme?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           country: string | null
@@ -515,10 +479,11 @@ export type Database = {
         Args: { _limit?: number; _offset?: number }
         Returns: {
           country: string
+          full_name: string
           id: string
+          participant_number: string
           points: number
           rank: number
-          school: string
         }[]
       }
       user_rank: { Args: { _user_id: string }; Returns: number }
