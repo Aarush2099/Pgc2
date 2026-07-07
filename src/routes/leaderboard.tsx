@@ -16,7 +16,7 @@ export const Route = createFileRoute("/leaderboard")({
   component: Leaderboard,
 });
 
-type IndRow = { rank: number; id: string; full_name: string | null; country: string | null; points: number };
+type IndRow = { rank: number; id: string; school: string | null; country: string | null; points: number };
 type CountryRow = { rank: number; country: string; total_points: number; participants: number };
 
 function SkeletonRows({ cols }: { cols: number }) {
@@ -96,7 +96,7 @@ function Leaderboard() {
               <thead>
                 <tr className="border-b border-border text-[11px] uppercase tracking-widest text-muted-foreground">
                   <th className="text-left py-3 pr-4 w-12">#</th>
-                  <th className="text-left py-3 pr-4">Name</th>
+                  <th className="text-left py-3 pr-4">School</th>
                   <th className="text-left py-3 pr-4 hidden sm:table-cell">Country</th>
                   <th className="text-right py-3 pr-4">Points</th>
                 </tr>
@@ -111,7 +111,7 @@ function Leaderboard() {
                   return (
                     <tr key={r.id} className={`border-b border-border ${mine ? "bg-[var(--leaf)]/10" : "hover:bg-secondary/60"} transition-colors`}>
                       <td className="py-3 pr-4 text-muted-foreground">{String(r.rank).padStart(2, "0")}</td>
-                      <td className="py-3 pr-4 font-semibold">{r.full_name ?? "Anonymous"}{mine && <span className="ml-2 text-[10px] uppercase tracking-widest text-[var(--leaf)]">you</span>}</td>
+                      <td className="py-3 pr-4 font-semibold">{r.school ?? "—"}{mine && <span className="ml-2 text-[10px] uppercase tracking-widest text-[var(--leaf)]">you</span>}</td>
                       <td className="py-3 pr-4 hidden sm:table-cell text-muted-foreground">
                         {r.country ? (
                           <span className="inline-flex items-center gap-2">
