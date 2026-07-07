@@ -77,7 +77,7 @@ export const generateRegionalContextsBatch = createServerFn({ method: "POST" })
     if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { countries, dayNumber, theme, year, overwrite } = data;
+    const { countries, dayNumber, theme, year, overwrite, runId } = data;
 
     // Skip rows that already exist unless overwrite
     let countriesToProcess = countries;
@@ -172,9 +172,38 @@ export const generateRegionalContextsBatch = createServerFn({ method: "POST" })
     );
 
     const succeeded = results.filter((r) => r.status === "fulfilled").length;
-    const failedDetails = results
-      .filter((r): r is PromiseRejectedResult => r.status === "rejected")
-      .map((r) => (r.reason instanceof Error ? r.reason.message : String(r.reason)));
+    const rejected = results.filter(
+      (r): r is PromiseRejectedResult => r.status === "rejected",
+    );
+    const failedDetails = rejected.map((r) =>
+      r.reason instanceof Error ? r.reason.message : String(r.reason),
+    );
+
+    // Persist failures to the admin-only error log (best-effort — never fail the run).
+    if (runId && rejected.length > 0) {
+      const rows = rejected.map((r, idx) => {
+        // Extract country from "... (Country)" or "... for Country:" patterns.
+        const msg = failedDetails[idx] ?? "";
+        const parenMatch = msg.match(/\(([^)]+)\)\s*$/);
+        const forMatch = msg.match(/for ([^:]+)(?::|$)/);
+        const country =
+          (parenMatch?.[1] ?? forMatch?.[1] ?? "").trim() || countriesToProcess[idx] || "unknown";
+        return {
+          run_id: runId,
+          scope: "regional_contexts",
+          day_number: dayNumber,
+          theme,
+          country,
+          error: msg.slice(0, 500),
+          created_by: context.userId,
+        };
+      });
+      try {
+        await supabaseAdmin.from("generation_error_log").insert(rows);
+      } catch {
+        // swallow — logging must never break the generator
+      }
+    }
 
     return {
       generated: succeeded,
