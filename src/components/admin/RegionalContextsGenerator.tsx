@@ -55,6 +55,7 @@ export function RegionalContextsGenerator({ onAfterRun }: { onAfterRun?: () => v
     }
     setGenerating(true);
     setSummary(null);
+    const runId = crypto.randomUUID();
 
     const themesToRun = RESEARCH_THEMES.filter((t) => selectedDays.includes(t.day));
     let totalGenerated = 0;
@@ -72,7 +73,7 @@ export function RegionalContextsGenerator({ onAfterRun }: { onAfterRun?: () => v
           const batch = COUNTRIES.slice(i, i + BATCH_SIZE);
           try {
             const result = await generate({
-              data: { countries: batch, dayNumber: day, theme, year: YEAR, overwrite },
+              data: { countries: batch, dayNumber: day, theme, year: YEAR, overwrite, runId },
             });
             totalGenerated += result.generated;
             totalSkipped += result.skipped;
