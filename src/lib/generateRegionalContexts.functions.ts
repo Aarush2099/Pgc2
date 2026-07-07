@@ -39,6 +39,7 @@ const GenerateInput = z.object({
   theme: z.string().min(1),
   year: z.number().int().min(2024).max(2100).default(2026),
   overwrite: z.boolean().default(false),
+  runId: z.string().uuid().optional(),
 });
 
 type PriorityT = "critical" | "high" | "medium" | "low";
