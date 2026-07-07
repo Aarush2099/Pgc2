@@ -192,8 +192,7 @@ export const getPublicSettings = createServerFn({ method: "GET" })
         { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (sb as any).from("admin_settings").select("key,value").eq("is_public", true);
-
+      const { data } = await (sb as any).from("admin_settings").select("key,value");
 
       return { settings: data ?? [] };
     } catch {

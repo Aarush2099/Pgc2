@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
@@ -40,91 +40,82 @@ export type Database = {
       }
       admin_actions: {
         Row: {
-          action: string
-          actor_email: string | null
-          actor_id: string | null
+          action_type: string
+          admin_email: string | null
+          admin_id: string | null
           created_at: string
+          detail: Json | null
           id: string
-          metadata: Json
-          target_country: string | null
-          target_day_number: number | null
-          target_theme: string | null
+          target_id: string | null
           target_type: string | null
-          target_year: number | null
         }
         Insert: {
-          action: string
-          actor_email?: string | null
-          actor_id?: string | null
+          action_type: string
+          admin_email?: string | null
+          admin_id?: string | null
           created_at?: string
+          detail?: Json | null
           id?: string
-          metadata?: Json
-          target_country?: string | null
-          target_day_number?: number | null
-          target_theme?: string | null
+          target_id?: string | null
           target_type?: string | null
-          target_year?: number | null
         }
         Update: {
-          action?: string
-          actor_email?: string | null
-          actor_id?: string | null
+          action_type?: string
+          admin_email?: string | null
+          admin_id?: string | null
           created_at?: string
+          detail?: Json | null
           id?: string
-          metadata?: Json
-          target_country?: string | null
-          target_day_number?: number | null
-          target_theme?: string | null
+          target_id?: string | null
           target_type?: string | null
-          target_year?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "admin_actions_actor_id_fkey"
-            columns: ["actor_id"]
+            foreignKeyName: "admin_actions_admin_id_fkey"
+            columns: ["admin_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
-      admin_settings: {
+      admin_emails: {
         Row: {
-          is_public: boolean
-          key: string
-          updated_at: string
-          updated_by: string | null
-          value: Json
+          created_at: string
+          email: string
         }
         Insert: {
-          is_public?: boolean
-          key: string
-          updated_at?: string
-          updated_by?: string | null
-          value?: Json
+          created_at?: string
+          email: string
         }
         Update: {
-          is_public?: boolean
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
+      admin_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: string
+        }
+        Update: {
           key?: string
           updated_at?: string
-          updated_by?: string | null
-          value?: Json
+          value?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "admin_settings_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       country_challenges: {
         Row: {
           action_prompt: string | null
           approved_at: string | null
-          approved_by: string | null
           brief: string | null
           country: string
           created_at: string
@@ -145,7 +136,6 @@ export type Database = {
         Insert: {
           action_prompt?: string | null
           approved_at?: string | null
-          approved_by?: string | null
           brief?: string | null
           country: string
           created_at?: string
@@ -166,7 +156,6 @@ export type Database = {
         Update: {
           action_prompt?: string | null
           approved_at?: string | null
-          approved_by?: string | null
           brief?: string | null
           country?: string
           created_at?: string
@@ -184,15 +173,7 @@ export type Database = {
           updated_at?: string
           year?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "country_challenges_approved_by_fkey"
-            columns: ["approved_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -274,7 +255,7 @@ export type Database = {
           created_at: string
           day_number: number
           id: string
-          priority: string
+          priority: string | null
           theme: string
           updated_at: string
           year: number
@@ -286,7 +267,7 @@ export type Database = {
           created_at?: string
           day_number: number
           id?: string
-          priority?: string
+          priority?: string | null
           theme: string
           updated_at?: string
           year?: number
@@ -298,45 +279,12 @@ export type Database = {
           created_at?: string
           day_number?: number
           id?: string
-          priority?: string
+          priority?: string | null
           theme?: string
           updated_at?: string
           year?: number
         }
         Relationships: []
-      }
-      submission_links: {
-        Row: {
-          created_at: string
-          policy_submission_id: string
-          research_submission_id: string
-        }
-        Insert: {
-          created_at?: string
-          policy_submission_id: string
-          research_submission_id: string
-        }
-        Update: {
-          created_at?: string
-          policy_submission_id?: string
-          research_submission_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "submission_links_policy_submission_id_fkey"
-            columns: ["policy_submission_id"]
-            isOneToOne: false
-            referencedRelation: "submissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "submission_links_research_submission_id_fkey"
-            columns: ["research_submission_id"]
-            isOneToOne: false
-            referencedRelation: "submissions"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       submissions: {
         Row: {
@@ -468,13 +416,18 @@ export type Database = {
           total_points: number
         }[]
       }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      has_role:
+        | {
+            Args: { _role: Database["public"]["Enums"]["app_role"] }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              _role: Database["public"]["Enums"]["app_role"]
+              _user_id: string
+            }
+            Returns: boolean
+          }
       individual_leaderboard: {
         Args: { _limit?: number; _offset?: number }
         Returns: {
@@ -489,7 +442,7 @@ export type Database = {
       user_rank: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
-      app_role: "student" | "admin"
+      app_role: "admin" | "student"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -617,7 +570,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["student", "admin"],
+      app_role: ["admin", "student"],
     },
   },
 } as const
