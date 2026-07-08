@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.prevent_submission_sensitive_update() FROM PUBLIC, anon, authenticated;

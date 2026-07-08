@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth";
 import { getFlagThumb } from "@/lib/flags";
+import { getLeaderboards, getUserRank } from "@/lib/leaderboard.functions";
+
 
 
 export const Route = createFileRoute("/leaderboard")({
@@ -42,28 +44,38 @@ function Leaderboard() {
   const [countries, setCountries] = useState<CountryRow[] | null>(null);
   const [myRank, setMyRank] = useState<number | null>(null);
 
+  const fetchLeaderboards = useServerFn(getLeaderboards);
+  const fetchUserRank = useServerFn(getUserRank);
+
   useEffect(() => {
     let cancel = false;
     (async () => {
-      const { data } = await supabase.rpc("individual_leaderboard", { _limit: 50, _offset: 0 });
-      if (!cancel) setIndividual((data as IndRow[]) ?? []);
-    })();
-    (async () => {
-      const { data } = await supabase.rpc("country_leaderboard");
-      if (!cancel) setCountries((data as CountryRow[]) ?? []);
+      try {
+        const res = await fetchLeaderboards();
+        if (cancel) return;
+        setIndividual(res.individual);
+        setCountries(res.countries);
+      } catch {
+        if (!cancel) { setIndividual([]); setCountries([]); }
+      }
     })();
     return () => { cancel = true; };
-  }, []);
+  }, [fetchLeaderboards]);
 
   useEffect(() => {
     if (!user) { setMyRank(null); return; }
     let cancel = false;
     (async () => {
-      const { data } = await supabase.rpc("user_rank", { _user_id: user.id });
-      if (!cancel) setMyRank(typeof data === "number" ? data : null);
+      try {
+        const res = await fetchUserRank({ data: { userId: user.id } });
+        if (!cancel) setMyRank(res.rank);
+      } catch {
+        if (!cancel) setMyRank(null);
+      }
     })();
     return () => { cancel = true; };
-  }, [user]);
+  }, [user, fetchUserRank]);
+
 
   const myCountry = profile?.country ?? null;
   const inTop50 = user && individual?.some(r => r.id === user.id);
