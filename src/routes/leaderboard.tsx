@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth";
 import { getFlagThumb } from "@/lib/flags";
+import { getLeaderboards, getUserRank } from "@/lib/leaderboard.functions";
+
 
 
 export const Route = createFileRoute("/leaderboard")({
